@@ -1,5 +1,13 @@
 package com.mirza.remoterunner;
 
+import android.os.Bundle;
+import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -7,25 +15,19 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import com.google.android.material.navigation.NavigationView;
-import com.jcraft.jsch.JSchException;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+
+    private static final ExecutorService executor = Executors.newFixedThreadPool(4);
 
     private DrawerLayout drawer;
     private LinearLayout buttonContainer;
     private TextView outputText;
-    private ActionBarDrawerToggle toggle;
     private EditText hostnameInput, portInput, usernameInput, passwordInput, commandInput;
 
     @Override
@@ -33,13 +35,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Use the correct Toolbar type for setSupportActionBar
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
-        // Set listener on navigationView object
         navigationView.setNavigationItemSelectedListener(this);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar,
@@ -75,31 +75,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         Button newButton = new Button(this);
         newButton.setText(command);
-/**        newButton.setOnClickListener(v -> {
-            new AsyncTask<Void, Void, String>() {
-                @Override
-                protected String doInBackground(Void... voids) {
-                    try {
-                        return RemoteRunner.executeCommand(hostname, port, username, password, command);
-                    } catch (Exception e) {
-                        return "Error: " + e.getMessage();
-                    }
+        newButton.setOnClickListener(v -> {
+            CompletableFuture.supplyAsync(() -> {
+                try {
+                    return RemoteRunner.executeCommand(hostname, port, username, password, command);
+                } catch (Exception e) {
+                    return "Error: " + e.getMessage();
                 }
-
-                @Override
-                protected void onPostExecute(String result) {
-                    // Display the result in the TextView or dialog
+            }, executor).thenAccept(result -> {
+                runOnUiThread(() -> {
                     outputText.setText(result);
-                }
-            }.execute();
-        });**/
+                });
+            });
+        });
         buttonContainer.addView(newButton);
     }
 
-    // Implement the required method from NavigationView.OnNavigationItemSelectedListener
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        executor.shutdown();
+    }
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
+
         //TODO
         // Handle navigation item clicks here, like switching fragments
         // (omitted for brevity)
