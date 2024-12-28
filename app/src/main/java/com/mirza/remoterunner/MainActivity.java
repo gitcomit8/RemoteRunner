@@ -56,9 +56,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         commandInput = findViewById(R.id.command_input);
 
         Button addButton = findViewById(R.id.add_button);
-        addButton.setOnClickListener(v -> {
-            addButton();
-        });
+        addButton.setOnClickListener(v -> addButton());
     }
 
     private void addButton() {
@@ -75,19 +73,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         Button newButton = new Button(this);
         newButton.setText(command);
-        newButton.setOnClickListener(v -> {
-            CompletableFuture.supplyAsync(() -> {
-                try {
-                    return RemoteRunner.executeCommand(hostname, port, username, password, command);
-                } catch (Exception e) {
-                    return "Error: " + e.getMessage();
-                }
-            }, executor).thenAccept(result -> {
-                runOnUiThread(() -> {
-                    outputText.setText(result);
-                });
-            });
-        });
+        newButton.setOnClickListener(v -> CompletableFuture.supplyAsync(() -> {
+            try {
+                return RemoteRunner.executeCommand(hostname, port, username, password, command);
+            } catch (Exception e) {
+                return "Error: " + e.getMessage();
+            }
+        }, executor).thenAccept(result -> runOnUiThread(() -> outputText.setText(result))));
         buttonContainer.addView(newButton);
     }
 
