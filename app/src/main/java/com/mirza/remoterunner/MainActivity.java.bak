@@ -1,0 +1,92 @@
+package com.mirza.remoterunner;
+
+import android.os.Bundle;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import android.os.AsyncTask;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.Toolbar;
+
+import com.google.android.material.navigation.NavigationView;
+import com.jcraft.jsch.JSchException;
+
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+
+    private DrawerLayout drawer;
+    private LinearLayout buttonContainer;
+    private TextView outputTest;
+    private EditText hostnameInput, portInput, usernameInput, passwordInput, commandInput;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        drawer = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        NavigationView.setNavigationItemSelectedListener(this);
+
+        ActionBarDrawerToggle toggle=new ActionBarDrawerToggle(this, drawer,toolbar, R.string.navigation_drawer_open,R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        buttonContainer = findViewById(R.id.button_container);
+        outputTest = findViewById(R.id.output_text);
+        hostnameInput = findViewById(R.id.hostname_input);
+        portInput = findViewById(R.id.port_input);
+        usernameInput = findViewById(R.id.username_input);
+        passwordInput = findViewById(R.id.password_input);
+        commandInput = findViewById(R.id.command_input);
+
+        Button addButton=findViewById(R.id.add_button);
+        addButton.setOnClickListener((v -> {
+            MainActivity.addButtonMet();
+        }));
+
+    private static void addButtonMet() {
+        String hostname = hostnameInput.getText().toString();
+        int port = Integer.parseInt(portInput.getText().toString().isEmpty()?"22":portInput.getText().toString());
+        String username = usernameInput.getText().toString();
+        String password = passwordInput.getText().toString();
+        String command = commandInput.getText().toString();
+
+        if(hostname.isEmpty()||username.isEmpty()||password.isEmpty()||command.isEmpty()){
+            Toast.makeText(this,"Please fill all the fields",Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Button newButton = new Button(this);
+        newButton.setText(command);
+        newButton.setOnClickListener(v -> {
+            new  AsyncTask<Void, Void, String>() {
+                @Override
+                protected String doInBackground(Void... voids) {
+                    try{
+                        return RemoteRunner.executeCommand(hostname,port,username,password,command);)
+                    } catch (Exception e){
+                    return "";
+                }
+            }
+        };
+        });
+    }
+    }
+}

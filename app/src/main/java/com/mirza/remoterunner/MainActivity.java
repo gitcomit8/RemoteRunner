@@ -1,24 +1,110 @@
 package com.mirza.remoterunner;
 
-import android.os.Bundle;
-
-import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
-public class MainActivity extends AppCompatActivity {
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.material.navigation.NavigationView;
+import com.jcraft.jsch.JSchException;
+
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+
+    private DrawerLayout drawer;
+    private LinearLayout buttonContainer;
+    private TextView outputText;
+    private ActionBarDrawerToggle toggle;
+    private EditText hostnameInput, portInput, usernameInput, passwordInput, commandInput;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+
+        // Use the correct Toolbar type for setSupportActionBar
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        drawer = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        // Set listener on navigationView object
+        navigationView.setNavigationItemSelectedListener(this);
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        buttonContainer = findViewById(R.id.button_container);
+        outputText = findViewById(R.id.output_text);
+        hostnameInput = findViewById(R.id.hostname_input);
+        portInput = findViewById(R.id.port_input);
+        usernameInput = findViewById(R.id.username_input);
+        passwordInput = findViewById(R.id.password_input);
+        commandInput = findViewById(R.id.command_input);
+
+        Button addButton = findViewById(R.id.add_button);
+        addButton.setOnClickListener(v -> {
+            addButton();
         });
+    }
+
+    private void addButton() {
+        String hostname = hostnameInput.getText().toString();
+        int port = Integer.parseInt(portInput.getText().toString().isEmpty() ? "22" : portInput.getText().toString());
+        String username = usernameInput.getText().toString();
+        String password = passwordInput.getText().toString();
+        String command = commandInput.getText().toString();
+
+        if (hostname.isEmpty() || username.isEmpty() || password.isEmpty() || command.isEmpty()) {
+            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Button newButton = new Button(this);
+        newButton.setText(command);
+/**        newButton.setOnClickListener(v -> {
+            new AsyncTask<Void, Void, String>() {
+                @Override
+                protected String doInBackground(Void... voids) {
+                    try {
+                        return RemoteRunner.executeCommand(hostname, port, username, password, command);
+                    } catch (Exception e) {
+                        return "Error: " + e.getMessage();
+                    }
+                }
+
+                @Override
+                protected void onPostExecute(String result) {
+                    // Display the result in the TextView or dialog
+                    outputText.setText(result);
+                }
+            }.execute();
+        });**/
+        buttonContainer.addView(newButton);
+    }
+
+    // Implement the required method from NavigationView.OnNavigationItemSelectedListener
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        //TODO
+        // Handle navigation item clicks here, like switching fragments
+        // (omitted for brevity)
+
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 }
