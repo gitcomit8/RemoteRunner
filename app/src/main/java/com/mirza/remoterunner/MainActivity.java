@@ -16,7 +16,14 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
+import com.mirza.remoterunner.data.AppDatabase;
+import com.mirza.remoterunner.data.DRemoteRunner;
+import com.mirza.remoterunner.data.RemoteRunnerDAO;
+import com.mirza.remoterunner.RemoteRunner;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final ExecutorService executor = Executors.newFixedThreadPool(4);
 
     private DrawerLayout drawer;
+    private RemoteRunnerDAO remoteRunnerDAO;
     private LinearLayout buttonContainer;
     private TextView outputText;
     private EditText hostnameInput, portInput, usernameInput, passwordInput, commandInput;
@@ -46,6 +54,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+
+        AppDatabase db = AppDatabase.getDatabase(getApplicationContext());
+        remoteRunnerDAO = db.remoteRunnerDAO();
+
+        executor.execute(() -> {
+            List<DRemoteRunner> commands = remoteRunnerDAO.getAll();
+            runOnUiThread(() -> {
+                for (DRemoteRunner command : commands) {
+                    try {
+                        String decryptedPassword = EncryptionManager.decrypt(getApplicationContext(), command.encryptedPassword);
+                        addButtonFromDB(command.commandName, command.hostname, command.port, command.username, decryptedPassword, command.command);
+                    } catch (GeneralSecurityException | IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        });
 
         buttonContainer = findViewById(R.id.button_container);
         outputText = findViewById(R.id.output_text);
@@ -75,13 +100,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         newButton.setText(command);
         newButton.setOnClickListener(v -> CompletableFuture.supplyAsync(() -> {
             try {
+                String encryptedPassword = EncryptionManager.encrypt(getApplicationContext(), password);
+                DRemoteRunner newCommand = new DRemoteRunner(commandInput.getText().toString(), hostname, port, username, encryptedPassword, command);
+                executor.execute(() ->
+                        remoteRunnerDAO.insertAll(newCommand));
+                addButtonFromDB(commandInput.getText().toString(), hostname, port, username, password, command);
                 return RemoteRunner.executeCommand(hostname, port, username, password, command);
-            } catch (Exception e) {
+            } catch (GeneralSecurityException | IOException e) {
                 return "Error: " + e.getMessage();
             }
         }, executor).thenAccept(result -> runOnUiThread(() -> outputText.setText(result))));
         buttonContainer.addView(newButton);
     }
+
+    private void addButtonFromDB(String commandName, String hostname, int port, String username, String password, String command) {
+        Button newButton = new Button(this);
+        newButton.setText(commandName);
+        newButton.setOnClickListener(v -> CompletableFuture.supplyAsync(() -> {
+            try {
+                return RemoteRunner.executeCommand(hostname, port, username, password, command);
+            } catch (Exception e) {
+                return "Error: " + e.getMessage();
+            }
+        }));
+    }
+
 
     @Override
     protected void onDestroy() {

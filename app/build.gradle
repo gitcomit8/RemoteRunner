@@ -30,6 +30,9 @@ android {
 
 dependencies {
 
+    implementation libs.androidx.room.runtime
+    implementation libs.androidx.room.ktx
+    implementation libs.androidx.security.crypto
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity
@@ -39,4 +42,5 @@ dependencies {
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
+    annotationProcessor libs.androidx.room.compiler
 }
