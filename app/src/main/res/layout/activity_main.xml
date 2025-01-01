@@ -16,65 +16,15 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="#E63255"
+            android:background="?attr/colorPrimary"
             android:elevation="4dp"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-        <LinearLayout
-            android:id="@+id/button_container"
+        <FrameLayout
+            android:id="@+id/fragment_container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <EditText
-                android:id="@+id/hostname_input"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Hostname/IP" />
-
-            <EditText
-                android:id="@+id/port_input"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Port (22)"
-                android:inputType="number" />
-
-            <EditText
-                android:id="@+id/username_input"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Username" />
-
-            <EditText
-                android:id="@+id/password_input"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Password"
-                android:inputType="textPassword" />
-
-            <EditText
-                android:id="@+id/command_input"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Command" />
-
-            <Button
-                android:id="@+id/add_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="#E53255"
-                android:text="Add Command"
-                android:textColor="#FFFFFF" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/output_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="16dp" />
-
+            android:layout_height="match_parent" />
     </LinearLayout>
 
     <com.google.android.material.navigation.NavigationView

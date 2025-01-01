@@ -6,8 +6,11 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {SSHCommands.class}, version = 1, exportSchema = false)
+@Database(entities = {Host.class, SSHCommands.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
+    public abstract HostDAO hostDAO(); // Correct method name
+    public abstract RemoteRunnerDAO remoteRunnerDAO();
+
     private static volatile AppDatabase INSTANCE;
 
     public static AppDatabase getDatabase(final Context context) {
@@ -22,6 +25,4 @@ public abstract class AppDatabase extends RoomDatabase {
         }
         return INSTANCE;
     }
-
-    public abstract RemoteRunnerDAO remoteRunnerDAO();
 }
