@@ -6,7 +6,7 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "ssh_commands")
-public class DRemoteRunner {
+public class SSHCommands {
     @PrimaryKey(autoGenerate = true)
     public int id;
     @NonNull
@@ -24,14 +24,14 @@ public class DRemoteRunner {
     @ColumnInfo(name = "username")
     public String username;
 
-    @ColumnInfo(name = "encryoted_password")
+    @ColumnInfo(name = "encrypted_password")
     public String encryptedPassword;
 
     @NonNull
     @ColumnInfo(name = "command")
     public String command;
 
-    public DRemoteRunner(String commandName, String hostname, int port, String username, String encryptedPassword, String command) {
+    public SSHCommands(String commandName, String hostname, int port, String username, String encryptedPassword, String command) {
         this.commandName = commandName;
         this.hostname = hostname;
         this.port = port;

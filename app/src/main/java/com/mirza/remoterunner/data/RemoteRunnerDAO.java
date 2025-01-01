@@ -8,16 +8,16 @@ import androidx.room.Query;
 import java.util.List;
 
 @Dao
-public interface RemoteRunnerDAO{
-    @Query("SELECT * FROM DRemoteRunner")
-    List<DRemoteRunner> getAll();
+public interface RemoteRunnerDAO {
+    @Query("SELECT * FROM SSH_COMMANDS")
+    List<SSHCommands> getAll();
 
     @Insert
-    void insertAll(DRemoteRunner... commands);
+    void insertAll(SSHCommands... commands);
 
     @Delete
-    void delete(DRemoteRunner command);
+    void delete(SSHCommands command);
 
-    @Query("DELETE FROM DRemoteRunner")
+    @Query("DELETE FROM SSH_COMMANDS")
     void deleteAll();
 }

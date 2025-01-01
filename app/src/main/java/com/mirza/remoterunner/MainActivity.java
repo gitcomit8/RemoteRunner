@@ -1,6 +1,7 @@
 package com.mirza.remoterunner;
 
 import android.os.Bundle;
+import android.util.Log; // Import Log
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,9 +18,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 import com.mirza.remoterunner.data.AppDatabase;
-import com.mirza.remoterunner.data.DRemoteRunner;
 import com.mirza.remoterunner.data.RemoteRunnerDAO;
-import com.mirza.remoterunner.RemoteRunner;
+import com.mirza.remoterunner.data.SSHCommands;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -32,8 +32,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private static final ExecutorService executor = Executors.newFixedThreadPool(4);
 
+    private AppDatabase db;
     private DrawerLayout drawer;
-    private RemoteRunnerDAO remoteRunnerDAO;
+    private RemoteRunnerDAO remoteRunnerDAO; // Use the correct DAO
     private LinearLayout buttonContainer;
     private TextView outputText;
     private EditText hostnameInput, portInput, usernameInput, passwordInput, commandInput;
@@ -55,23 +56,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        AppDatabase db = AppDatabase.getDatabase(getApplicationContext());
-        remoteRunnerDAO = db.remoteRunnerDAO();
-
-        executor.execute(() -> {
-            List<DRemoteRunner> commands = remoteRunnerDAO.getAll();
-            runOnUiThread(() -> {
-                for (DRemoteRunner command : commands) {
-                    try {
-                        String decryptedPassword = EncryptionManager.decrypt(getApplicationContext(), command.encryptedPassword);
-                        addButtonFromDB(command.commandName, command.hostname, command.port, command.username, decryptedPassword, command.command);
-                    } catch (GeneralSecurityException | IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        });
-
         buttonContainer = findViewById(R.id.button_container);
         outputText = findViewById(R.id.output_text);
         hostnameInput = findViewById(R.id.hostname_input);
@@ -80,37 +64,55 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         passwordInput = findViewById(R.id.password_input);
         commandInput = findViewById(R.id.command_input);
 
+        db = AppDatabase.getDatabase(getApplicationContext());
+        remoteRunnerDAO = db.remoteRunnerDAO(); // Initialize the correct DAO
+
+        executor.execute(() -> {
+            List<SSHCommands> commands = remoteRunnerDAO.getAll();
+            runOnUiThread(() -> {
+                for (SSHCommands command : commands) {
+                    try {
+                        String decryptedPassword = EncryptionManager.decrypt(getApplicationContext(), command.encryptedPassword);
+                        if (decryptedPassword != null) { // Check if decrypted password is not null
+                            addButtonFromDB(command.commandName, command.hostname, command.port, command.username, decryptedPassword, command.command);
+                        } else {
+                            Log.e("Decryption Error", "Decryption failed for command: " + command.commandName);
+                            executor.execute(() -> remoteRunnerDAO.delete(command));
+                        }
+                    } catch (GeneralSecurityException | IOException e) {
+                        e.printStackTrace();
+                        Log.e("Decryption Error", "Exception during decryption for command: " + command.commandName, e);
+                        executor.execute(() -> remoteRunnerDAO.delete(command));
+                    }
+                }
+            });
+        });
+
         Button addButton = findViewById(R.id.add_button);
         addButton.setOnClickListener(v -> addButton());
     }
 
     private void addButton() {
+        String commandName = commandInput.getText().toString();
         String hostname = hostnameInput.getText().toString();
         int port = Integer.parseInt(portInput.getText().toString().isEmpty() ? "22" : portInput.getText().toString());
         String username = usernameInput.getText().toString();
         String password = passwordInput.getText().toString();
         String command = commandInput.getText().toString();
 
-        if (hostname.isEmpty() || username.isEmpty() || password.isEmpty() || command.isEmpty()) {
+        if (hostname.isEmpty() || username.isEmpty() || password.isEmpty() || command.isEmpty() || commandName.isEmpty()) {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Button newButton = new Button(this);
-        newButton.setText(command);
-        newButton.setOnClickListener(v -> CompletableFuture.supplyAsync(() -> {
-            try {
-                String encryptedPassword = EncryptionManager.encrypt(getApplicationContext(), password);
-                DRemoteRunner newCommand = new DRemoteRunner(commandInput.getText().toString(), hostname, port, username, encryptedPassword, command);
-                executor.execute(() ->
-                        remoteRunnerDAO.insertAll(newCommand));
-                addButtonFromDB(commandInput.getText().toString(), hostname, port, username, password, command);
-                return RemoteRunner.executeCommand(hostname, port, username, password, command);
-            } catch (GeneralSecurityException | IOException e) {
-                return "Error: " + e.getMessage();
-            }
-        }, executor).thenAccept(result -> runOnUiThread(() -> outputText.setText(result))));
-        buttonContainer.addView(newButton);
+        try {
+            String encryptedPassword = EncryptionManager.encrypt(getApplicationContext(), password);
+            SSHCommands newCommand = new SSHCommands(commandName, hostname, port, username, encryptedPassword, command);
+            executor.execute(() -> remoteRunnerDAO.insertAll(newCommand));
+            addButtonFromDB(commandName, hostname, port, username, password, command);
+        } catch (GeneralSecurityException | IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void addButtonFromDB(String commandName, String hostname, int port, String username, String password, String command) {
@@ -122,9 +124,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } catch (Exception e) {
                 return "Error: " + e.getMessage();
             }
-        }));
+        }, executor).thenAccept(result -> runOnUiThread(() -> outputText.setText(result))));
+        buttonContainer.addView(newButton);
     }
-
 
     @Override
     protected void onDestroy() {
@@ -135,11 +137,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
-
-        //TODO
-        // Handle navigation item clicks here, like switching fragments
-        // (omitted for brevity)
-
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
