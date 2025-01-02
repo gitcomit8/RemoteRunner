@@ -6,33 +6,32 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <EditText
-        android:id="@+id/hostname_input"
+    <Button
+        android:id="@+id/show_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Hostname"
-        android:minHeight="48dp"
-        tools:ignore="HardcodedText,TextFields" />
-
-    <EditText
-        android:id="@+id/username_input"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Username"
-        android:minHeight="48dp" />
-
-    <EditText
-        android:id="@+id/password_input"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Password"
-        android:inputType="textPassword"
-        android:minHeight="48dp" />
+        android:text="SHOW"
+        tools:ignore="HardcodedText,VisualLintButtonSize" />
 
     <Button
-        android:id="@+id/save_button"
-        android:layout_width="wrap_content"
+        android:id="@+id/edit_button"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Save Host" />
+        android:text="COMMANDS"
+        tools:ignore="HardcodedText,VisualLintButtonSize" />
+
+    <Button
+        android:id="@+id/hosts_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="HOSTS"
+        tools:ignore="HardcodedText,VisualLintButtonSize" />
+
+    <Button
+        android:id="@+id/delete_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="DELETE"
+        tools:ignore="HardcodedText,VisualLintButtonSize" />
 
 </LinearLayout>

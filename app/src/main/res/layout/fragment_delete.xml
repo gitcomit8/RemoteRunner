@@ -6,33 +6,31 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <EditText
-        android:id="@+id/command_name_input"
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Command Name"
-        android:minHeight="48dp" />
+        android:text="HOSTS"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        tools:ignore="HardcodedText" />
 
-    <EditText
-        android:id="@+id/command_input"
+    <LinearLayout
+        android:id="@+id/hosts_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Command"
-        android:minHeight="48dp"
-        tools:ignore="HardcodedText,VisualLintTextFieldSize" />
+        android:orientation="vertical" />
 
-    <Spinner
-        android:id="@+id/host_spinner"
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:minHeight="48dp" />
-
-    <Button
-        android:id="@+id/save_button"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Save Command" />
+        android:text="COMMANDS"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        tools:ignore="HardcodedText" />
+
+    <LinearLayout
+        android:id="@+id/commands_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" />
 
 </LinearLayout>

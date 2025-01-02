@@ -21,10 +21,9 @@ import java.util.concurrent.Executors;
 
 public class AddHostFragment extends Fragment {
 
-    private EditText hostnameInput, usernameInput, passwordInput;
-    private Button saveButton;
-    private HostDAO hostDao;
     private static final ExecutorService executor = Executors.newFixedThreadPool(4);
+    private EditText hostnameInput, usernameInput, passwordInput;
+    private HostDAO hostDao;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -33,7 +32,7 @@ public class AddHostFragment extends Fragment {
         hostnameInput = view.findViewById(R.id.hostname_input);
         usernameInput = view.findViewById(R.id.username_input);
         passwordInput = view.findViewById(R.id.password_input);
-        saveButton = view.findViewById(R.id.save_button);
+        Button saveButton = view.findViewById(R.id.save_button);
 
         AppDatabase db = AppDatabase.getDatabase(requireContext());
         hostDao = db.hostDAO();
