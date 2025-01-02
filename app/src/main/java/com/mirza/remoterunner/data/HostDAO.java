@@ -1,6 +1,7 @@
 package com.mirza.remoterunner.data;
 
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 
@@ -13,4 +14,8 @@ public interface HostDAO {
 
     @Insert
     void insertAll(Host... hosts);
+
+    @Delete
+    void deleteHost(Host host); // Add this line
+
 }

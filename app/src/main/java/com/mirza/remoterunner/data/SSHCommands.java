@@ -31,7 +31,7 @@ public class SSHCommands {
     @ColumnInfo(name = "command")
     public String command;
 
-    public SSHCommands(String commandName, String hostname, int port, String username, String encryptedPassword, String command) {
+    public SSHCommands(@NonNull String commandName, @NonNull String hostname, int port, @NonNull String username, String encryptedPassword, @NonNull String command) {
         this.commandName = commandName;
         this.hostname = hostname;
         this.port = port;

@@ -1,7 +1,12 @@
 package com.mirza.remoterunner;
 
-import com.jcraft.jsch.*;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+
 import java.io.IOException;
+
 public class RemoteRunner {
     public static String executeCommand(String host, int port, String user, String password, String command) {
         try {
@@ -28,18 +33,19 @@ public class RemoteRunner {
                     if (i < 0) break;
                     output.append(new String(tmp, 0, i));
                 }
-                if (channel.isClosed()){
-                    if(in.available()>0)continue;
+                if (channel.isClosed()) {
+                    if (in.available() > 0) continue;
                     break;
                 }
                 try {
                     Thread.sleep(1000);
-                }catch (Exception ignored){}
+                } catch (Exception ignored) {
+                }
             }
             channel.disconnect();
             session.disconnect();
-            return  output.toString();
-        }catch (JSchException| IOException e){
+            return output.toString();
+        } catch (JSchException | IOException e) {
             return "Error: " + e.getMessage();
         }
     }

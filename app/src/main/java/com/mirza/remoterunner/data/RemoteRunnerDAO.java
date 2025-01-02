@@ -18,6 +18,4 @@ public interface RemoteRunnerDAO {
     @Delete
     void delete(SSHCommands command);
 
-    @Query("DELETE FROM SSH_COMMANDS")
-    void deleteAll();
 }

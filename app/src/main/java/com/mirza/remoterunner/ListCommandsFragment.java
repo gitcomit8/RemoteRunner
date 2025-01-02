@@ -26,10 +26,10 @@ import java.util.concurrent.Executors;
 
 public class ListCommandsFragment extends Fragment {
 
+    private static final ExecutorService executor = Executors.newFixedThreadPool(4);
     private RecyclerView recyclerView;
     private CommandAdapter adapter;
     private RemoteRunnerDAO remoteRunnerDAO;
-    private static final ExecutorService executor = Executors.newFixedThreadPool(4);
     private TextView outputText;
 
     @Override
@@ -79,36 +79,35 @@ public class ListCommandsFragment extends Fragment {
             return commands.size();
         }
 
-        public class CommandViewHolder extends RecyclerView.ViewHolder {
-            Button button; // Use a Button
-
-            public CommandViewHolder(@NonNull View itemView) {
-                super(itemView);
-                button = itemView.findViewById(R.id.command_button); // Find the Button in command_item.xml
-            }
-        }
-
         @Override
         public void onBindViewHolder(@NonNull CommandViewHolder holder, int position) {
             SSHCommands command = commands.get(position);
             holder.button.setText(command.commandName);
 
             holder.button.setOnClickListener(v -> CompletableFuture.supplyAsync(() -> {
-                    try {
-                        return RemoteRunner.executeCommand(command.hostname, command.port, command.username, command.encryptedPassword, command.command);
-                    } catch (Exception e) {
-                        return "Error: " + e.getMessage();
-                    }
-                }, executor).thenAccept(result -> requireActivity().runOnUiThread(() -> outputText.setText(result))));
+                try {
+                    return RemoteRunner.executeCommand(command.hostname, command.port, command.username, command.encryptedPassword, command.command);
+                } catch (Exception e) {
+                    return "Error: " + e.getMessage();
+                }
+            }, executor).thenAccept(result -> requireActivity().runOnUiThread(() -> outputText.setText(result))));
 
             holder.button.setOnLongClickListener(v -> {
-                // Long click listener for displaying details
                 String details = "Command: " + command.command + "\n" +
                         "Hostname: " + command.hostname + "\n" +
                         "Username: " + command.username;
                 Toast.makeText(requireContext(), details, Toast.LENGTH_LONG).show();
                 return true;
             });
+        }
+
+        public class CommandViewHolder extends RecyclerView.ViewHolder {
+            Button button;
+
+            public CommandViewHolder(@NonNull View itemView) {
+                super(itemView);
+                button = itemView.findViewById(R.id.command_button);
+            }
         }
     }
 }

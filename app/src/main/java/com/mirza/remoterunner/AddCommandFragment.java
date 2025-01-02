@@ -15,9 +15,8 @@ import androidx.fragment.app.Fragment;
 import com.mirza.remoterunner.data.AppDatabase;
 import com.mirza.remoterunner.data.Host;
 import com.mirza.remoterunner.data.HostDAO;
-import com.mirza.remoterunner.data.RemoteRunnerDAO; // Assuming this is the DAO for SSHCommands
+import com.mirza.remoterunner.data.RemoteRunnerDAO;
 import com.mirza.remoterunner.data.SSHCommands;
-
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -28,12 +27,11 @@ import java.util.concurrent.Executors;
 
 public class AddCommandFragment extends Fragment {
 
+    private static final ExecutorService executor = Executors.newFixedThreadPool(4);
     private EditText commandNameInput, commandInput;
     private Spinner hostSpinner;
-    private Button saveButton;
     private RemoteRunnerDAO remoteRunnerDAO;
     private HostDAO hostDao;
-    private static final ExecutorService executor = Executors.newFixedThreadPool(4);
     private List<Host> hostList;
 
     @Override
@@ -43,7 +41,7 @@ public class AddCommandFragment extends Fragment {
         commandNameInput = view.findViewById(R.id.command_name_input);
         commandInput = view.findViewById(R.id.command_input);
         hostSpinner = view.findViewById(R.id.host_spinner);
-        saveButton = view.findViewById(R.id.save_button);
+        Button saveButton = view.findViewById(R.id.save_button);
 
         AppDatabase db = AppDatabase.getDatabase(requireContext());
         remoteRunnerDAO = db.remoteRunnerDAO();
