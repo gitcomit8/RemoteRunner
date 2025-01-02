@@ -17,7 +17,7 @@
         android:id="@+id/edit_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="EDIT"
+        android:text="COMMANDS"
         tools:ignore="HardcodedText,VisualLintButtonSize" />
 
     <Button
