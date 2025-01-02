@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -74,20 +75,6 @@ public class ListCommandsFragment extends Fragment {
         }
 
         @Override
-        public void onBindViewHolder(@NonNull CommandViewHolder holder, int position) {
-            SSHCommands command = commands.get(position);
-            holder.button.setText(command.commandName);
-
-            holder.button.setOnClickListener(v -> CompletableFuture.supplyAsync(() -> {
-                try {
-                    return RemoteRunner.executeCommand(command.hostname, command.port, command.username, command.encryptedPassword, command.command);
-                } catch (Exception e) {
-                    return "Error: " + e.getMessage();
-                }
-            }, executor).thenAccept(result -> requireActivity().runOnUiThread(() -> outputText.setText(result))));
-        }
-
-        @Override
         public int getItemCount() {
             return commands.size();
         }
@@ -99,6 +86,29 @@ public class ListCommandsFragment extends Fragment {
                 super(itemView);
                 button = itemView.findViewById(R.id.command_button); // Find the Button in command_item.xml
             }
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull CommandViewHolder holder, int position) {
+            SSHCommands command = commands.get(position);
+            holder.button.setText(command.commandName);
+
+            holder.button.setOnClickListener(v -> CompletableFuture.supplyAsync(() -> {
+                    try {
+                        return RemoteRunner.executeCommand(command.hostname, command.port, command.username, command.encryptedPassword, command.command);
+                    } catch (Exception e) {
+                        return "Error: " + e.getMessage();
+                    }
+                }, executor).thenAccept(result -> requireActivity().runOnUiThread(() -> outputText.setText(result))));
+
+            holder.button.setOnLongClickListener(v -> {
+                // Long click listener for displaying details
+                String details = "Command: " + command.command + "\n" +
+                        "Hostname: " + command.hostname + "\n" +
+                        "Username: " + command.username;
+                Toast.makeText(requireContext(), details, Toast.LENGTH_LONG).show();
+                return true;
+            });
         }
     }
 }
